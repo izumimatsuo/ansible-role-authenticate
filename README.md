@@ -1,6 +1,6 @@
-# ansible-role-authenticate
+# ansible-role-authenticate [![Build Status](https://travis-ci.org/izumimatsuo/ansible-role-authenticate.svg?branch=master)](https://travis-ci.org/izumimatsuo/ansible-role-authenticate)
 
-Linux ユーザ管理機能を提供する ansible role です
+Linux ユーザ管理機能を設定する ansible role です
 
 標準で以下の設定を実施
 
