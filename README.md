@@ -34,7 +34,7 @@ UNIX パスワード認証を利用するにあたって、セキュリティポ
 | users                | []           | ユーザ追加情報（後述）                         |
 | user_group           | maintainer   | 一般ユーザグループ名                           |
 | admin_group          | adminuser    | 管理ユーザグループ名                           |
-| enable_term_logging  | no           | 操作ログ記録の有無                             |
+| enable_term_logging  | yes          | 操作ログ記録の有無                             |
 | enable_two_step_auth | no           | 二段階認証設定有無                             |
 | only_public_key_user | none         | 二段階認証回避（公開鍵認証のみ許可）するユーザ |
 | passwd_expiration    | 99999        | パスワード有効期間（日数）                     |
