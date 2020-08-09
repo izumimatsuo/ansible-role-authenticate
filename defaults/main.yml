@@ -1,0 +1,13 @@
+---
+# defaults file for ansible-role-authenticate
+users:
+  - name:
+    group:
+    public_key:
+    sudoers:
+user_group: maintainer
+admin_group: adminuser
+enable_two_step_auth: no
+only_public_key_user:
+passwd_expiration: 99999
+passwd_quality:

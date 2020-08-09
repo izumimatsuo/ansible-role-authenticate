@@ -1,0 +1,79 @@
+---
+# tasks file for ansible-role-authenticate
+- name: install password_hash package
+  yum:
+    name:
+      - python-passlib
+  tags: auth
+
+- name: create user group
+  group:
+    name: '{{ user_group }}'
+  tags: auth
+
+- name: create admin group
+  group:
+    name: '{{ admin_group }}'
+  tags: auth
+
+- name: add sudoers admin group
+  lineinfile:
+    path: '/etc/sudoers.d/{{ admin_group }}'
+    create: yes
+    regexp: '^%{{ admin_group }}'
+    line: '%{{ admin_group }} ALL=(ALL) NOPASSWD: ALL'
+    validate: '/usr/sbin/visudo -cf %s'
+  tags: auth
+
+- name: create users
+  user:
+    name: '{{ item.name }}'
+    password: "{{ item.name | password_hash('sha512') }}"
+    group: '{{ user_group }}'
+    groups: '{{ user_group }}{% if item.sudoers is defined and item.sudoers %},{{ admin_group }}{% endif %}'
+    update_password: on_create
+  register: user_add
+  with_items: '{{ users }}'
+  tags: auth
+
+- name: add public key
+  authorized_key:
+    user: '{{ item.name }}'
+    key: '{{ item.public_key }}'
+  with_items: '{{ users }}'
+  tags: auth
+
+- name: get current users list
+  shell: 'set -o pipefail; getent group {{ user_group }} | cut -d: -f4 | tr "," "\n"'
+  register: current_users
+  changed_when: false
+  tags: auth
+
+- name: remove invalid users
+  user:
+    name: '{{ item }}'
+    state: absent
+    remove: yes
+  with_items: "{{ current_users.stdout_lines | difference(users | map(attribute='name') | list) }}"
+  tags: auth
+
+- name: edit sshd_config (setting PubkeyAuthentication)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PubkeyAuthentication'
+    line: 'PubkeyAuthentication yes'
+  notify: restart sshd service
+  tags: auth
+
+- name: edit sshd_config (setting authentication method)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^AuthenticationMethods'
+    line: 'AuthenticationMethods publickey'
+  when: not enable_two_step_auth
+  notify: restart sshd service
+  tags: auth
+
+- include_tasks: two_step_auth.yml
+  when: enable_two_step_auth
+  tags: auth

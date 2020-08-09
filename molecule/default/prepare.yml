@@ -1,0 +1,13 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: install sshd package
+    yum:
+      name:
+        - openssh-server
+
+  - name: start sshd service
+    service:
+      name: sshd
+      state: started

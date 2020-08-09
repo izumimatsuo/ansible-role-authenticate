@@ -1,0 +1,7 @@
+---
+# handlers file for ansible-role-authenticate
+- name: restart sshd service
+  service:
+    name: sshd
+    state: restarted
+  tags: auth

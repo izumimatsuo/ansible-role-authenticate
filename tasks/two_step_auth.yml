@@ -1,0 +1,84 @@
+---
+# tasks file for ansible-role-authenticate
+- name: install epel repository
+  yum:
+    name: epel-release
+  tags: auth
+
+- name: install authentication package
+  yum:
+    name:
+      - google-authenticator
+  tags: auth
+
+- name: edit pam sshd (add google_authencticator)
+  lineinfile:
+    path: /etc/pam.d/sshd
+    insertbefore: '^auth\s*substack\s*password-auth'
+    line: 'auth [success=done ignore=ignore default=die] pam_google_authenticator.so nullok echo_verification_code'
+  tags: auth
+
+- name: edit sshd_config (setting ChallengeResponseAuthentication)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^ChallengeResponseAuthentication'
+    line: 'ChallengeResponseAuthentication yes'
+  notify: restart sshd service
+  tags: auth
+
+- name: edit sshd_config (setting authentication method)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^AuthenticationMethods'
+    line: 'AuthenticationMethods publickey,keyboard-interactive'
+  notify: restart sshd service
+  tags: auth
+
+- name: edit sshd_config (add only public_key user)
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: |
+      Match User {{ only_public_key_user }}
+          AuthenticationMethods publickey
+  notify: restart sshd service
+  when: only_public_key_user != None
+  tags: auth
+
+- name: set password quality
+  blockinfile:
+    path: '/etc/security/pwquality.conf'
+    block: |
+      {% if passwd_quality.difok is defined %}
+      difok = {{ passwd_quality.difok }}
+      {% endif %}
+      {% if passwd_quality.minlen is defined %}
+      minlen = {{ passwd_quality.minlen }}
+      {% endif %}
+      {% if passwd_quality.dcredit is defined %}
+      dcredit = {{ passwd_quality.dcredit }}
+      {% endif %}
+      {% if passwd_quality.ucredit is defined %}
+      ucredit = {{ passwd_quality.ucredit }}
+      {% endif %}
+      {% if passwd_quality.lcredit is defined %}
+      lcredit = {{ passwd_quality.lcredit }}
+      {% endif %}
+      {% if passwd_quality.ocredit is defined %}
+      ocredit = {{ passwd_quality.ocredit }}
+      {% endif %}
+      {% if passwd_quality.minclass is defined %}
+      minclass = {{ passwd_quality.minclass }}
+      {% endif %}
+      {% if passwd_quality.maxrepeat is defined %}
+      maxrepeat = {{ passwd_quality.maxrepeat }}
+      {% endif %}
+      {% if passwd_quality.maxclassrepeat is defined %}
+      maxclassrepeat = {{ passwd_quality.maxclassrepeat }}
+      {% endif %}
+  tags: auth
+
+- name: set password expiration
+  command: 'chage -d 0 -M {{ passwd_expiration }} {{ item.name }}'
+  when: item.create_home is defined and item.create_home
+  with_items: '{{ user_add.results }}'
+  tags: auth

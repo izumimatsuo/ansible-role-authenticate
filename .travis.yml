@@ -1,0 +1,16 @@
+---
+sudo: required
+
+language: python:3
+
+services:
+  - docker
+
+before_install:
+  - sudo apt -qq update
+
+install:
+  - pip install ansible==2.9.6 molecule==2.22 docker==4.2.0
+
+script:
+  - molecule test

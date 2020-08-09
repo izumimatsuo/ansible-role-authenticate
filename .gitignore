@@ -1,0 +1,10 @@
+# Created by https://www.gitignore.io/api/ansible,testinfra
+
+### Ansible ###
+*.retry
+
+### Testinfra ###
+__pycache__/
+.pytest_cache/
+
+# End of https://www.gitignore.io/api/ansible,testinfra
