@@ -25,6 +25,17 @@
     validate: '/usr/sbin/visudo -cf %s'
   tags: auth
 
+- name: apply termlog
+  blockinfile:
+    path: /etc/skel/.bash_profile
+    create: yes
+    insertafter: EOF
+    block: '{{ item }}'
+  with_file:
+    - files/termlog
+  when: enable_term_logging
+  tags: auth
+
 - name: create users
   user:
     name: '{{ item.name }}'

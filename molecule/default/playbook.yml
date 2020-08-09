@@ -6,6 +6,7 @@
       - name: 'test'
         public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABA...'
         sudoers: yes
+    enable_term_logging: yes
     enable_two_step_auth: yes
     only_public_key_user: 'molecule'
     passwd_quality: { minlen: 12, minclass: 4 }
