@@ -1,6 +1,6 @@
 # termlog
 P_PROC=`ps aux | grep $PPID | grep sshd | awk '{ print $11 }'`
-LOGPATH="$HOME/.termlog/termlog_$USER.$(date +%Y%m%d).$$.log"
+LOGPATH="$HOME/.termlog/termlog_$USER.$(date +%Y%m%d.%H%M%S).log"
 if [ "$P_PROC" = sshd: ]; then
   mkdir -p $HOME/.termlog
   find $HOME/.termlog -daystart -maxdepth 1 -name "*.log" -mtime +30 -exec rm {} \;
